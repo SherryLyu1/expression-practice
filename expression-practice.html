@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>表达练习</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f5f4f0;
+        --card: #ffffff;
+        --primary: #2d2d2d;
+        --accent: #4f6ef7;
+        --accent-light: #eef1ff;
+        --muted: #888;
+        --border: #e5e5e5;
+        --danger: #e05c5c;
+        --success: #4caf82;
+        --warning: #f0a050;
+        --radius: 12px;
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        font-family: var(--font);
+        color: var(--primary);
+        min-height: 100vh;
+        padding: 16px 16px 40px;
+      }
+
+      /* ── Header ── */
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 680px;
+        margin: 0 auto 20px;
+      }
+      header h1 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      header p {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sync-badge {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+      .sync-badge.synced {
+        background: #e6f9ef;
+        color: var(--success);
+      }
+      .sync-badge.syncing {
+        background: #eef1ff;
+        color: var(--accent);
+      }
+      .sync-badge.offline {
+        background: #fff3e0;
+        color: var(--warning);
+      }
+      .sync-badge.error {
+        background: #fff0f0;
+        color: var(--danger);
+      }
+
+      .icon-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      .icon-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      /* ── Settings panel ── */
+      .settings-panel {
+        display: none;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        max-width: 680px;
+        margin: 0 auto 20px;
+      }
+      .settings-panel.open {
+        display: block;
+      }
+
+      .settings-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      .settings-section {
+        margin-bottom: 16px;
+      }
+      .settings-section:last-of-type {
+        margin-bottom: 0;
+      }
+      .settings-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      .field {
+        margin-bottom: 10px;
+      }
+      .field label {
+        font-size: 13px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 5px;
+      }
+      .field input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: monospace;
+        outline: none;
+      }
+      .field input:focus {
+        border-color: var(--accent);
+      }
+
+      .settings-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .save-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .secondary-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      .secondary-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .github-hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+        line-height: 1.6;
+      }
+      .github-hint a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      /* ── Profile card ── */
+      .profile-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        max-width: 680px;
+        margin: 0 auto 16px;
+      }
+      .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .profile-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--accent);
+      }
+      .profile-sessions {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .profile-text {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-style: italic;
+      }
+      .profile-empty {
+        font-size: 13px;
+        color: #bbb;
+      }
+
+      /* ── Main container ── */
+      .container {
+        max-width: 680px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+
+      .step-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 15px;
+        font-family: var(--font);
+        line-height: 1.6;
+        resize: vertical;
+        min-height: 100px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      textarea:focus {
+        border-color: var(--accent);
+      }
+
+      .primary-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        margin-top: 12px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 13px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .primary-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .primary-btn:not(:disabled):hover {
+        opacity: 0.9;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: none;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Options ── */
+      .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .option-card {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .option-card:hover {
+        border-color: var(--accent);
+        background: var(--accent-light);
+      }
+      .option-card.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+      }
+      .option-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+      .option-text {
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .custom-section {
+        margin-top: 14px;
+      }
+      .custom-section label {
+        font-size: 13px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      /* ── Analysis ── */
+      .analysis-card {
+        background: var(--card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .analysis-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 12px;
+      }
+      .analysis-body {
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 480px) {
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .compare-box {
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .compare-box-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+      }
+      .compare-box-label.original {
+        color: var(--danger);
+      }
+      .compare-box-label.final {
+        color: var(--success);
+      }
+      .compare-box p {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .gap-list {
+        list-style: none;
+      }
+      .gap-list li {
+        padding: 10px 12px;
+        background: #fff8f0;
+        border-left: 3px solid var(--warning);
+        border-radius: 4px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .tip-box {
+        background: #f0fff8;
+        border: 1px solid #b2e8cd;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .saving-indicator {
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 8px;
+      }
+
+      .reset-btn {
+        width: 100%;
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 14px;
+        color: var(--muted);
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      .reset-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      /* ── History ── */
+      .history-section {
+        max-width: 680px;
+        margin: 24px auto 0;
+      }
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .history-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .history-clear {
+        font-size: 12px;
+        color: var(--danger);
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+
+      .history-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 8px;
+      }
+      .history-item-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .history-item-original {
+        font-size: 13px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+      }
+      .history-item-final {
+        font-size: 14px;
+        color: var(--primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .error-msg {
+        background: #fff0f0;
+        border: 1px solid #fcc;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+        color: var(--danger);
+        margin-top: 10px;
+        line-height: 1.5;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div>
+        <h1>表达练习</h1>
+        <p>输入 → 改进 → 选择 → 分析</p>
+      </div>
+      <div class="header-right">
+        <span class="sync-badge offline hidden" id="syncBadge"></span>
+        <button class="icon-btn" onclick="toggleSettings()">⚙ 设置</button>
+      </div>
+    </header>
+
+    <!-- Settings -->
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-title">设置</div>
+
+      <div class="settings-section">
+        <div class="settings-section-label">Claude API</div>
+        <div class="field">
+          <label>API Key</label>
+          <input type="password" id="claudeKeyInput" placeholder="sk-ant-..." />
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-label">
+          GitHub 同步（可选，用于跨设备记忆）
+        </div>
+        <div class="field">
+          <label>Personal Access Token</label>
+          <input type="password" id="githubTokenInput" placeholder="ghp_..." />
+        </div>
+        <div class="field">
+          <label>GitHub 用户名</label>
+          <input type="text" id="githubUserInput" placeholder="your-username" />
+        </div>
+        <div class="field">
+          <label>仓库名</label>
+          <input
+            type="text"
+            id="githubRepoInput"
+            placeholder="expression-practice"
+          />
+        </div>
+        <p class="github-hint">
+          Token 需要 <strong>repo</strong> 权限。去 GitHub → Settings →
+          Developer settings → Personal access tokens → Tokens (classic) 生成。
+        </p>
+      </div>
+
+      <div class="settings-actions">
+        <button class="save-btn" onclick="saveSettings()">保存</button>
+        <button class="secondary-btn" onclick="testGithub()">
+          测试 GitHub 连接
+        </button>
+      </div>
+    </div>
+
+    <!-- Preference profile -->
+    <div class="profile-card hidden" id="profileCard">
+      <div class="profile-header">
+        <span class="profile-label">AI 对你的了解</span>
+        <span class="profile-sessions" id="profileSessions"></span>
+      </div>
+      <div class="profile-text hidden" id="profileText"></div>
+      <div class="profile-empty" id="profileEmpty">
+        完成第一次练习后，AI 会开始积累对你的了解…
+      </div>
+    </div>
+
+    <!-- Main app -->
+    <div class="container" id="mainApp">
+      <!-- Step 1 -->
+      <div class="card">
+        <div class="step-label">Step 1 — 输入你想说的话</div>
+        <textarea
+          id="originalInput"
+          placeholder="把你想表达的内容写在这里，不用担心说得不好…"
+          rows="4"
+        ></textarea>
+        <div id="step1Error" class="error-msg hidden"></div>
+        <button
+          class="primary-btn"
+          id="generateBtn"
+          onclick="generateOptions()"
+        >
+          <span class="spinner" id="generateSpinner"></span>
+          生成改进选项
+        </button>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="card hidden" id="step2Card">
+        <div class="step-label">Step 2 — 选择一个版本，或综合写一个</div>
+        <div class="options-grid" id="optionsGrid"></div>
+        <div class="custom-section">
+          <label>或者，综合以上版本自己写一个：</label>
+          <textarea
+            id="customFinal"
+            placeholder="结合上面的改进，写出你自己最满意的版本…"
+            rows="3"
+          ></textarea>
+        </div>
+        <div id="step2Error" class="error-msg hidden"></div>
+        <button class="primary-btn" id="analyzeBtn" onclick="analyzeChoice()">
+          <span class="spinner" id="analyzeSpinner"></span>
+          分析我的选择
+        </button>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="hidden" id="step3Section">
+        <div class="analysis-card">
+          <div class="analysis-title">📊 原始 vs 最终</div>
+          <div class="compare-row">
+            <div class="compare-box">
+              <div class="compare-box-label original">原始表达</div>
+              <p id="compareOriginal"></p>
+            </div>
+            <div class="compare-box">
+              <div class="compare-box-label final">最终版本</div>
+              <p id="compareFinal"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="analysis-card">
+          <div class="analysis-title">💡 为什么这个版本更好</div>
+          <div class="analysis-body" id="whyChosen"></div>
+        </div>
+
+        <div class="analysis-card">
+          <div class="analysis-title">🔍 差距在哪里</div>
+          <ul class="gap-list" id="gapList"></ul>
+        </div>
+
+        <div class="analysis-card">
+          <div class="analysis-title">🎯 本次提升建议</div>
+          <div class="tip-box" id="tipBox"></div>
+        </div>
+
+        <div class="saving-indicator hidden" id="savingIndicator">
+          正在同步到 GitHub…
+        </div>
+
+        <button class="reset-btn" onclick="reset()">↩ 开始下一次练习</button>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-section hidden" id="historySection">
+      <div class="history-header">
+        <div class="history-title">历史记录</div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+    <script>
+      const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+      const CLAUDE_API = "https://api.anthropic.com/v1/messages";
+      const DATA_FILE = "data.json";
+
+      // ── State ─────────────────────────────────────────────────────────────────
+
+      let state = {
+        original: "",
+        options: [],
+        selectedIndex: -1,
+        finalText: "",
+      };
+
+      let memory = {
+        preference_profile: "",
+        total_sessions: 0,
+        sessions: [],
+      };
+
+      let githubFileSha = null; // needed for GitHub file updates
+
+      // ── Settings ──────────────────────────────────────────────────────────────
+
+      function getSettings() {
+        return {
+          claudeKey: localStorage.getItem("ep_claude_key") || "",
+          githubToken: localStorage.getItem("ep_github_token") || "",
+          githubUser: localStorage.getItem("ep_github_user") || "",
+          githubRepo: localStorage.getItem("ep_github_repo") || "",
+        };
+      }
+
+      function toggleSettings() {
+        const panel = document.getElementById("settingsPanel");
+        panel.classList.toggle("open");
+        if (panel.classList.contains("open")) {
+          const s = getSettings();
+          document.getElementById("claudeKeyInput").value = s.claudeKey;
+          document.getElementById("githubTokenInput").value = s.githubToken;
+          document.getElementById("githubUserInput").value = s.githubUser;
+          document.getElementById("githubRepoInput").value = s.githubRepo;
+        }
+      }
+
+      function saveSettings() {
+        const claudeKey = document
+          .getElementById("claudeKeyInput")
+          .value.trim();
+        const githubToken = document
+          .getElementById("githubTokenInput")
+          .value.trim();
+        const githubUser = document
+          .getElementById("githubUserInput")
+          .value.trim();
+        const githubRepo = document
+          .getElementById("githubRepoInput")
+          .value.trim();
+
+        if (claudeKey) localStorage.setItem("ep_claude_key", claudeKey);
+        if (githubToken) localStorage.setItem("ep_github_token", githubToken);
+        if (githubUser) localStorage.setItem("ep_github_user", githubUser);
+        if (githubRepo) localStorage.setItem("ep_github_repo", githubRepo);
+
+        document.getElementById("settingsPanel").classList.remove("open");
+        loadFromGithub();
+      }
+
+      async function testGithub() {
+        try {
+          setSyncBadge("syncing", "测试中…");
+          await loadFromGithub();
+          setSyncBadge("synced", "连接成功");
+        } catch (e) {
+          setSyncBadge("error", "连接失败");
+          alert("GitHub 连接失败：" + e.message);
+        }
+      }
+
+      // ── GitHub API ────────────────────────────────────────────────────────────
+
+      function hasGithub() {
+        const s = getSettings();
+        return s.githubToken && s.githubUser && s.githubRepo;
+      }
+
+      function githubUrl() {
+        const s = getSettings();
+        return `https://api.github.com/repos/${s.githubUser}/${s.githubRepo}/contents/${DATA_FILE}`;
+      }
+
+      async function loadFromGithub() {
+        if (!hasGithub()) {
+          loadFromLocal();
+          return;
+        }
+        const s = getSettings();
+        setSyncBadge("syncing", "同步中");
+        try {
+          const resp = await fetch(githubUrl(), {
+            headers: {
+              Authorization: `token ${s.githubToken}`,
+              Accept: "application/vnd.github.v3+json",
+            },
+          });
+
+          if (resp.status === 404) {
+            // File doesn't exist yet — start fresh
+            githubFileSha = null;
+            setSyncBadge("synced", "已连接");
+            renderProfile();
+            return;
+          }
+
+          if (!resp.ok) throw new Error(`GitHub 返回 ${resp.status}`);
+
+          const data = await resp.json();
+          githubFileSha = data.sha;
+          const decoded = JSON.parse(atob(data.content.replace(/\n/g, "")));
+          memory = {
+            preference_profile: "",
+            total_sessions: 0,
+            sessions: [],
+            ...decoded,
+          };
+          setSyncBadge("synced", "已同步");
+          renderProfile();
+          renderHistory();
+        } catch (e) {
+          setSyncBadge("error", "同步失败");
+          loadFromLocal();
+          throw e;
+        }
+      }
+
+      async function saveToGithub() {
+        if (!hasGithub()) {
+          saveToLocal();
+          return;
+        }
+        const s = getSettings();
+        const content = btoa(
+          unescape(encodeURIComponent(JSON.stringify(memory, null, 2))),
+        );
+
+        const body = {
+          message: `练习记录 #${memory.total_sessions}`,
+          content,
+        };
+        if (githubFileSha) body.sha = githubFileSha;
+
+        setSyncBadge("syncing", "保存中");
+        const resp = await fetch(githubUrl(), {
+          method: "PUT",
+          headers: {
+            Authorization: `token ${s.githubToken}`,
+            Accept: "application/vnd.github.v3+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err?.message || `GitHub 写入失败 (${resp.status})`);
+        }
+
+        const result = await resp.json();
+        githubFileSha = result.content.sha;
+        setSyncBadge("synced", "已同步");
+      }
+
+      // ── Local storage fallback ─────────────────────────────────────────────────
+
+      function loadFromLocal() {
+        const saved = localStorage.getItem("ep_memory");
+        if (saved) memory = JSON.parse(saved);
+        renderProfile();
+        renderHistory();
+      }
+
+      function saveToLocal() {
+        localStorage.setItem("ep_memory", JSON.stringify(memory));
+      }
+
+      // ── Sync badge ─────────────────────────────────────────────────────────────
+
+      function setSyncBadge(type, text) {
+        const badge = document.getElementById("syncBadge");
+        badge.className = `sync-badge ${type}`;
+        badge.textContent = text;
+        badge.classList.remove("hidden");
+      }
+
+      // ── Claude API ────────────────────────────────────────────────────────────
+
+      async function callClaude(systemPrompt, userMessage, maxTokens = 1024) {
+        const { claudeKey } = getSettings();
+        if (!claudeKey) throw new Error("请先在设置中填写 Claude API Key");
+
+        const resp = await fetch(CLAUDE_API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": claudeKey,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+          body: JSON.stringify({
+            model: CLAUDE_MODEL,
+            max_tokens: maxTokens,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userMessage }],
+          }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(
+            err?.error?.message || `API 请求失败 (${resp.status})`,
+          );
+        }
+        return (await resp.json()).content[0].text;
+      }
+
+      function parseJSON(text) {
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("AI 返回格式异常，请重试");
+        return JSON.parse(match[0]);
+      }
+
+      // ── Step 1 → Generate options ─────────────────────────────────────────────
+
+      async function generateOptions() {
+        const input = document.getElementById("originalInput").value.trim();
+        if (!input) {
+          showError("step1Error", "请先输入你想表达的内容");
+          return;
+        }
+        hideError("step1Error");
+        setLoading("generateBtn", "generateSpinner", true);
+
+        try {
+          const profileContext = memory.preference_profile
+            ? `\n\n关于这位用户的表达偏好（根据历史练习积累）：\n${memory.preference_profile}`
+            : "";
+
+          const system = `你是一位专业的中文表达改进教练。用户会给你一段原始表达，你给出3个实质不同的改进版本，让用户看到不同的表达角度。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
+
+          const raw = await callClaude(
+            system,
+            `改进以下表达，给出3个不同风格的版本：
+
+原始表达：${input}
+
+返回格式（严格 JSON）：
+{
+  "versions": [
+    {"label": "简洁直接版", "text": "..."},
+    {"label": "清晰有力版", "text": "..."},
+    {"label": "完整周全版", "text": "..."}
+  ]
+}`,
+          );
+
+          const result = parseJSON(raw);
+          state.original = input;
+          state.options = result.versions;
+          state.selectedIndex = -1;
+          state.finalText = "";
+
+          renderOptions(result.versions);
+          document.getElementById("step2Card").classList.remove("hidden");
+          document
+            .getElementById("step2Card")
+            .scrollIntoView({ behavior: "smooth" });
+        } catch (e) {
+          showError("step1Error", e.message);
+        } finally {
+          setLoading("generateBtn", "generateSpinner", false);
+        }
+      }
+
+      function renderOptions(versions) {
+        const grid = document.getElementById("optionsGrid");
+        grid.innerHTML = "";
+        versions.forEach((v, i) => {
+          const card = document.createElement("div");
+          card.className = "option-card";
+          card.innerHTML = `<div class="option-label">${v.label}</div><div class="option-text">${v.text}</div>`;
+          card.addEventListener("click", () => {
+            document
+              .querySelectorAll(".option-card")
+              .forEach((c, idx) => c.classList.toggle("selected", idx === i));
+            state.selectedIndex = i;
+            document.getElementById("customFinal").value = "";
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      // ── Step 2 → Analyze ──────────────────────────────────────────────────────
+
+      async function analyzeChoice() {
+        const custom = document.getElementById("customFinal").value.trim();
+        const finalText =
+          custom ||
+          (state.selectedIndex >= 0
+            ? state.options[state.selectedIndex].text
+            : "");
+        if (!finalText) {
+          showError("step2Error", "请选择一个版本，或自己综合写一个");
+          return;
+        }
+
+        hideError("step2Error");
+        state.finalText = finalText;
+        setLoading("analyzeBtn", "analyzeSpinner", true);
+
+        try {
+          const profileContext = memory.preference_profile
+            ? `\n\n用户历史偏好画像：\n${memory.preference_profile}`
+            : "";
+
+          const optionsText = state.options
+            .map((v, i) => `${i + 1}. 【${v.label}】${v.text}`)
+            .join("\n");
+
+          const system = `你是一位专业的表达教练，帮助用户深度分析表达选择，目标是让用户内化提升。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
+
+          const raw = await callClaude(
+            system,
+            `分析用户的表达选择：
+
+原始表达：${state.original}
+
+给出的改进选项：
+${optionsText}
+
+用户最终版本：
+${finalText}
+
+返回严格 JSON：
+{
+  "why_chosen": "分析用户为什么倾向于这个版本，推断他的偏好和判断标准（2-3句）",
+  "gaps": [
+    "原始与最终的第一个具体差距（说明是什么、为什么最终版本更好）",
+    "第二个差距",
+    "第三个差距"
+  ],
+  "tip": "一条高度可复用的提升建议，针对他这次具体问题，不要泛泛而谈",
+  "profile_update": "根据本次练习，用1-2句话概括或更新用户的表达偏好特征，将与已有画像合并"
+}`,
+          );
+
+          const result = parseJSON(raw);
+
+          // Update memory
+          memory.total_sessions += 1;
+          memory.preference_profile = mergeProfile(
+            memory.preference_profile,
+            result.profile_update,
+          );
+          memory.sessions.unshift({
+            date: new Date().toLocaleString("zh-CN", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            original: state.original,
+            final: finalText,
+            tip: result.tip,
+          });
+          if (memory.sessions.length > 50) memory.sessions.pop();
+
+          renderAnalysis(result);
+
+          // Save
+          const indicator = document.getElementById("savingIndicator");
+          if (hasGithub()) indicator.classList.remove("hidden");
+          try {
+            await saveToGithub();
+          } catch (_) {
+            saveToLocal();
+          }
+          indicator.classList.add("hidden");
+
+          renderProfile();
+          renderHistory();
+        } catch (e) {
+          showError("step2Error", e.message);
+        } finally {
+          setLoading("analyzeBtn", "analyzeSpinner", false);
+        }
+      }
+
+      function mergeProfile(existing, update) {
+        if (!existing) return update;
+        if (!update) return existing;
+        // Keep it short — let Claude condense over time naturally
+        // Simple append with deduplication hint
+        return existing + " " + update;
+      }
+
+      function renderAnalysis(result) {
+        document.getElementById("compareOriginal").textContent = state.original;
+        document.getElementById("compareFinal").textContent = state.finalText;
+        document.getElementById("whyChosen").textContent = result.why_chosen;
+        document.getElementById("gapList").innerHTML = result.gaps
+          .map((g) => `<li>${g}</li>`)
+          .join("");
+        document.getElementById("tipBox").textContent = result.tip;
+        document.getElementById("step3Section").classList.remove("hidden");
+        document
+          .getElementById("step3Section")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      // ── Profile ───────────────────────────────────────────────────────────────
+
+      function renderProfile() {
+        const card = document.getElementById("profileCard");
+        card.classList.remove("hidden");
+
+        const sessionsEl = document.getElementById("profileSessions");
+        sessionsEl.textContent =
+          memory.total_sessions > 0 ? `已练习 ${memory.total_sessions} 次` : "";
+
+        const textEl = document.getElementById("profileText");
+        const emptyEl = document.getElementById("profileEmpty");
+
+        if (memory.preference_profile) {
+          textEl.textContent = memory.preference_profile;
+          textEl.classList.remove("hidden");
+          emptyEl.classList.add("hidden");
+        } else {
+          textEl.classList.add("hidden");
+          emptyEl.classList.remove("hidden");
+        }
+      }
+
+      // ── History ───────────────────────────────────────────────────────────────
+
+      function renderHistory() {
+        const section = document.getElementById("historySection");
+        const list = document.getElementById("historyList");
+
+        if (!memory.sessions.length) {
+          section.classList.add("hidden");
+          return;
+        }
+        section.classList.remove("hidden");
+
+        list.innerHTML = memory.sessions
+          .slice(0, 10)
+          .map(
+            (s) => `
+      <div class="history-item">
+        <div class="history-item-meta">
+          <span>${s.date}</span>
+        </div>
+        <div class="history-item-original">原：${s.original}</div>
+        <div class="history-item-final">→ ${s.final}</div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      // ── Reset ─────────────────────────────────────────────────────────────────
+
+      function reset() {
+        document.getElementById("originalInput").value = "";
+        document.getElementById("customFinal").value = "";
+        document.getElementById("optionsGrid").innerHTML = "";
+        document.getElementById("step2Card").classList.add("hidden");
+        document.getElementById("step3Section").classList.add("hidden");
+        hideError("step1Error");
+        hideError("step2Error");
+        state = { original: "", options: [], selectedIndex: -1, finalText: "" };
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ── Helpers ───────────────────────────────────────────────────────────────
+
+      function setLoading(btnId, spinnerId, on) {
+        document.getElementById(btnId).disabled = on;
+        document.getElementById(spinnerId).style.display = on
+          ? "block"
+          : "none";
+      }
+      function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove("hidden");
+      }
+      function hideError(id) {
+        document.getElementById(id).classList.add("hidden");
+      }
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+
+      (function init() {
+        if (hasGithub()) {
+          loadFromGithub().catch(() => {});
+        } else {
+          loadFromLocal();
+          if (!getSettings().claudeKey) {
+            document.getElementById("settingsPanel").classList.add("open");
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
