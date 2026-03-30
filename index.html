@@ -473,13 +473,6 @@
         font-weight: 600;
         color: var(--muted);
       }
-      .history-clear {
-        font-size: 12px;
-        color: var(--danger);
-        background: none;
-        border: none;
-        cursor: pointer;
-      }
 
       .history-item {
         background: var(--card);
@@ -635,6 +628,26 @@
         <button class="primary-btn" id="analyzeBtn" onclick="analyzeChoice()">
           <span class="spinner" id="analyzeSpinner"></span>
           分析我的选择
+        </button>
+        <button
+          class="secondary-btn"
+          id="regenBtn"
+          onclick="regenOptions()"
+          style="
+            width: 100%;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          "
+        >
+          <span
+            class="spinner"
+            id="regenSpinner"
+            style="border-color: rgba(0, 0, 0, 0.15); border-top-color: #888"
+          ></span>
+          都不满意，换一批
         </button>
       </div>
 
@@ -970,22 +983,93 @@
         }
       }
 
+      function makeOptionCard(v, globalIndex) {
+        const card = document.createElement("div");
+        card.className = "option-card";
+        card.dataset.index = globalIndex;
+        card.innerHTML = `<div class="option-label">${v.label}</div><div class="option-text">${v.text}</div>`;
+        card.addEventListener("click", () => {
+          document
+            .querySelectorAll(".option-card")
+            .forEach((c) =>
+              c.classList.toggle(
+                "selected",
+                parseInt(c.dataset.index) === globalIndex,
+              ),
+            );
+          state.selectedIndex = globalIndex;
+          document.getElementById("customFinal").value = "";
+        });
+        return card;
+      }
+
       function renderOptions(versions) {
         const grid = document.getElementById("optionsGrid");
         grid.innerHTML = "";
-        versions.forEach((v, i) => {
-          const card = document.createElement("div");
-          card.className = "option-card";
-          card.innerHTML = `<div class="option-label">${v.label}</div><div class="option-text">${v.text}</div>`;
-          card.addEventListener("click", () => {
-            document
-              .querySelectorAll(".option-card")
-              .forEach((c, idx) => c.classList.toggle("selected", idx === i));
-            state.selectedIndex = i;
-            document.getElementById("customFinal").value = "";
-          });
-          grid.appendChild(card);
+        versions.forEach((v, i) => grid.appendChild(makeOptionCard(v, i)));
+      }
+
+      function appendOptions(versions) {
+        const grid = document.getElementById("optionsGrid");
+        const offset = grid.querySelectorAll(".option-card").length;
+
+        const divider = document.createElement("div");
+        divider.style.cssText =
+          "font-size:11px;color:var(--muted);text-align:center;padding:6px 0;letter-spacing:.06em;";
+        divider.textContent = "— 新一批 —";
+        grid.appendChild(divider);
+
+        versions.forEach((v, i) =>
+          grid.appendChild(makeOptionCard(v, offset + i)),
+        );
+        grid.lastElementChild.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
         });
+      }
+
+      // ── Regenerate options ────────────────────────────────────────────────────
+
+      async function regenOptions() {
+        hideError("step2Error");
+        setLoading("regenBtn", "regenSpinner", true);
+        document.getElementById("customFinal").value = "";
+        state.selectedIndex = -1;
+        document
+          .querySelectorAll(".option-card.selected")
+          .forEach((c) => c.classList.remove("selected"));
+
+        try {
+          const profileContext = memory.preference_profile
+            ? `\n\n关于这位用户的表达偏好（根据历史练习积累）：\n${memory.preference_profile}`
+            : "";
+
+          const system = `你是一位专业的中文表达改进教练。用户对上一批改进版本不满意，请给出3个风格不同、角度新颖的改进版本。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
+
+          const raw = await callClaude(
+            system,
+            `用户对之前的改进版本不满意，请重新生成3个不同的版本：
+
+原始表达：${state.original}
+
+返回格式（严格 JSON）：
+{
+  "versions": [
+    {"label": "简洁直接版", "text": "..."},
+    {"label": "清晰有力版", "text": "..."},
+    {"label": "完整周全版", "text": "..."}
+  ]
+}`,
+          );
+
+          const result = parseJSON(raw);
+          state.options = [...state.options, ...result.versions];
+          appendOptions(result.versions);
+        } catch (e) {
+          showError("step2Error", e.message);
+        } finally {
+          setLoading("regenBtn", "regenSpinner", false);
+        }
       }
 
       // ── Step 2 → Analyze ──────────────────────────────────────────────────────
@@ -1038,7 +1122,7 @@ ${finalText}
     "第三个差距"
   ],
   "tip": "一条高度可复用的提升建议，针对他这次具体问题，不要泛泛而谈",
-  "profile_update": "根据本次练习，用1-2句话概括或更新用户的表达偏好特征，将与已有画像合并"
+  "profile_update": "综合已有画像和本次练习，重新归纳用户的表达偏好画像。结构固定为三行：【偏好风格】一句话；【常见问题】一句话；【已有改善】一句话（没有则写暂无）。总字数控制在150字以内。"
 }`,
           );
 
@@ -1085,11 +1169,7 @@ ${finalText}
       }
 
       function mergeProfile(existing, update) {
-        if (!existing) return update;
-        if (!update) return existing;
-        // Keep it short — let Claude condense over time naturally
-        // Simple append with deduplication hint
-        return existing + " " + update;
+        return update || existing;
       }
 
       function renderAnalysis(result) {
