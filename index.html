@@ -803,7 +803,9 @@
 
           const data = await resp.json();
           githubFileSha = data.sha;
-          const decoded = JSON.parse(atob(data.content.replace(/\n/g, "")));
+          const decoded = JSON.parse(
+            decodeURIComponent(escape(atob(data.content.replace(/\n/g, "")))),
+          );
           memory = {
             preference_profile: "",
             total_sessions: 0,
