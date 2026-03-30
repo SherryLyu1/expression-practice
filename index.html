@@ -708,6 +708,7 @@
       let state = {
         original: "",
         options: [],
+        batches: [], // 每批选项，用于分析拒绝行为
         selectedIndex: -1,
         finalText: "",
       };
@@ -968,6 +969,7 @@
           const result = parseJSON(raw);
           state.original = input;
           state.options = result.versions;
+          state.batches = [result.versions];
           state.selectedIndex = -1;
           state.finalText = "";
 
@@ -1044,26 +1046,34 @@
             ? `\n\n关于这位用户的表达偏好（根据历史练习积累）：\n${memory.preference_profile}`
             : "";
 
-          const system = `你是一位专业的中文表达改进教练。用户对上一批改进版本不满意，请给出3个风格不同、角度新颖的改进版本。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
+          const rejectedText = state.options
+            .map((v, i) => `  ${i + 1}. 【${v.label}】${v.text}`)
+            .join("\n");
+
+          const system = `你是一位专业的中文表达改进教练。用户对已给出的所有版本都不满意，请给出3个全新的、与之前明显不同的改进版本。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
 
           const raw = await callClaude(
             system,
-            `用户对之前的改进版本不满意，请重新生成3个不同的版本：
+            `用户对以下所有版本都不满意，请给出3个全新角度的版本，不要重复已有的表达方式：
 
 原始表达：${state.original}
+
+用户已拒绝的所有版本：
+${rejectedText}
 
 返回格式（严格 JSON）：
 {
   "versions": [
-    {"label": "简洁直接版", "text": "..."},
-    {"label": "清晰有力版", "text": "..."},
-    {"label": "完整周全版", "text": "..."}
+    {"label": "...", "text": "..."},
+    {"label": "...", "text": "..."},
+    {"label": "...", "text": "..."}
   ]
 }`,
           );
 
           const result = parseJSON(raw);
           state.options = [...state.options, ...result.versions];
+          state.batches.push(result.versions);
           appendOptions(result.versions);
         } catch (e) {
           showError("step2Error", e.message);
@@ -1095,9 +1105,29 @@
             ? `\n\n用户历史偏好画像：\n${memory.preference_profile}`
             : "";
 
-          const optionsText = state.options
-            .map((v, i) => `${i + 1}. 【${v.label}】${v.text}`)
-            .join("\n");
+          const batchesText = state.batches
+            .map((batch, bi) => {
+              const isRejected =
+                bi < state.batches.length - 1 ||
+                (state.selectedIndex === -1 &&
+                  document.getElementById("customFinal").value.trim());
+              const label =
+                bi === 0
+                  ? "第一批"
+                  : `第${bi + 1}批（用户点了"换一批"，说明整批不满意）`;
+              return (
+                `【${label}】\n` +
+                batch
+                  .map((v, i) => `  ${i + 1}. 【${v.label}】${v.text}`)
+                  .join("\n")
+              );
+            })
+            .join("\n\n");
+
+          const regenNote =
+            state.batches.length > 1
+              ? `\n注意：用户共请求了 ${state.batches.length} 批选项，前 ${state.batches.length - 1} 批被整体拒绝，说明那些方向不符合用户偏好。`
+              : "";
 
           const system = `你是一位专业的表达教练，帮助用户深度分析表达选择，目标是让用户内化提升。严格按 JSON 格式返回，不要多余文字。${profileContext}`;
 
@@ -1107,22 +1137,23 @@
 
 原始表达：${state.original}
 
-给出的改进选项：
-${optionsText}
+所有给出的选项（按批次）：
+${batchesText}
+${regenNote}
 
 用户最终版本：
 ${finalText}
 
 返回严格 JSON：
 {
-  "why_chosen": "分析用户为什么倾向于这个版本，推断他的偏好和判断标准（2-3句）",
+  "why_chosen": "分析用户为什么选这个版本，以及（如果换过批次）为什么之前的批次不满意，推断偏好和排斥点（2-3句）",
   "gaps": [
-    "原始与最终的第一个具体差距（说明是什么、为什么最终版本更好）",
+    "原始与最终的第一个具体差距",
     "第二个差距",
     "第三个差距"
   ],
   "tip": "一条高度可复用的提升建议，针对他这次具体问题，不要泛泛而谈",
-  "profile_update": "综合已有画像和本次练习，重新归纳用户的表达偏好画像。结构固定为三行：【偏好风格】一句话；【常见问题】一句话；【已有改善】一句话（没有则写暂无）。总字数控制在150字以内。"
+  "profile_update": "综合已有画像、本次选择和拒绝行为，重新归纳用户的表达偏好画像。要求：1）结构固定为四个维度：【偏好风格】【排斥风格】【常见问题】【已有进步】；2）每个维度可以写1-3句，有依据再写，没有规律不要强行总结；3）保持客观，基于行为推断，不要过度解读；4）各维度角度不重复；5）总字数控制在300字以内。如某维度暂无足够证据，写"暂无规律"。"
 }`,
           );
 
@@ -1247,7 +1278,13 @@ ${finalText}
         document.getElementById("step3Section").classList.add("hidden");
         hideError("step1Error");
         hideError("step2Error");
-        state = { original: "", options: [], selectedIndex: -1, finalText: "" };
+        state = {
+          original: "",
+          options: [],
+          batches: [],
+          selectedIndex: -1,
+          finalText: "",
+        };
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
